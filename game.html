@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="game.css">
+  <script src="game.js"></script>
+</head>
+
+<body>
+  <div id="main">
+    <div id="board">
+      <div id="melding">
+      </div>
+    </div>
+    <div id="registrer">
+      <form>
+        <br>
+        <label> Navn
+          <input id="navn" type="text" placeholder="fornavn etternavn">
+        </label>
+        <br>
+        <label> Alder
+          <input id="alder" type="number" min=12 max=90>
+        </label>
+        <br>
+        <label> Dato
+          <input id="dato" type="date">
+        </label>
+        <br>
+        <br>
+        <button type="button" id="lagre">Lagre</button>
+      </form>
+    </div>
+
+  </div>
+  <script>
+    setup();
+  </script>
+</body>
+
+</html>
