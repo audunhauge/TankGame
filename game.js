@@ -5,6 +5,7 @@ function setup() {
     let poeng = 0;
 
     let divBoard = document.getElementById("board");
+    let divMelding = document.getElementById("melding");
     let frmRegistrer = document.getElementById("registrer");
     
     // sjekk om denne brukeren er registrert
@@ -23,12 +24,22 @@ function setup() {
   
     // legg tanken ut på stagen (på board)
     divBoard.appendChild(divTank2); 
-
-
+    
     let btnStart = document.createElement("button");
     btnStart.className = "startbutton";
     btnStart.id = "start";
-    btnStart.innerHTML = "Start spillet";
+    
+    if (playerInfo !== undefined) {
+        let playerObject = JSON.parse(playerInfo);
+        divMelding.innerHTML = `Hei ${playerObject.navn}`;
+        btnStart.innerHTML = "Start spillet";
+    } else {
+        btnStart.innerHTML = "Registrer deg";  
+    }
+
+
+  
+    
   
     // legg start-knappen ut på stagen (på board)
     divBoard.appendChild(btnStart); 

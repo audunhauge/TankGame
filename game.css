@@ -10,6 +10,9 @@
 #melding {
     color: red;
     font-size:1.5em;
+    position: absolute;
+    left: calc(50% - 50px);
+    top: calc(50% - 90px);
 }
 
 
