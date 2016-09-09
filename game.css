@@ -22,6 +22,10 @@
     top: calc(50% - 8px);
 }
 
+#reg {
+  top: calc(50% + 28px);
+}
+
 .tanks.intro1 {
   animation: walk-about 15s linear infinite;
 }
@@ -33,6 +37,10 @@
 .go_away {
   animation: goLeft 1s;
   animation-fill-mode: forwards;
+}
+
+.hidden {
+  display: none;
 }
 
 .come_here {
@@ -119,4 +127,8 @@
     height: 2px;
     background: linear-gradient(to top, #00c,#99c);
     box-shadow: 1px 1px 1px rgba(10,10,10,0.2);
+}
+
+.tanks.active {
+  visibility: visible;
 }
