@@ -95,7 +95,7 @@
 }
 
 .tanks {
-    position: relative;
+    position: absolute;
     width: 30px;
     height: 13px;
     background-color: blue;

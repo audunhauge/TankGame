@@ -13,17 +13,18 @@ function setup() {
 
     // vi skal legge en tanks ut på skjermen
     // første versjon er bare en div med class="tank"
-    let divTank1 = document.createElement("div");
-    divTank1.className = "tanks intro1";
+    let tank1 = new Tank("t1","intro1");
   
     // legg tanken ut på stagen (på board)
-    divBoard.appendChild(divTank1);  
+    divBoard.appendChild(tank1.div);  
 
-    let divTank2 = document.createElement("div");
-    divTank2.className = "tanks intro2";
+    let tank2 = new Tank("t2", "intro2");
   
     // legg tanken ut på stagen (på board)
-    divBoard.appendChild(divTank2); 
+    divBoard.appendChild(tank2.div); 
+    
+    // lag en ny spiller
+    let player = new Player("noname",12);
     
     let btnReg = document.createElement("button");
     btnReg.className = "startbutton";
@@ -38,7 +39,9 @@ function setup() {
         let playerObject = JSON.parse(playerInfo);
         divMelding.innerHTML = `Hei ${playerObject.navn}`;
         btnReg.innerHTML = "Rediger info";
-        btnStart.classList.remove("hidden");    
+        btnStart.classList.remove("hidden");  
+        player.navn = playerObject.navn;
+        player.alder = playerObject.alder;  
     } else {
         btnReg.innerHTML = "Registrer deg";  
     }   
@@ -82,6 +85,9 @@ function setup() {
         let dato = inpDato.value;
         
         let playerInfo = JSON.stringify({navn,alder,dato});
+        player.navn = navn;
+        player.alder = alder; 
+        
         localStorage.setItem("player", playerInfo );
         divBoard.classList.remove("go_away");
         void divBoard.offsetWidth;
@@ -94,13 +100,14 @@ function setup() {
     }
     
     function startGame() {
-      divTank1.classList.remove("intro1");
-      divTank2.classList.remove("intro2");
-      divTank1.classList.add("active");
-      divTank2.classList.add("active");
+      tank1.div.classList.remove("intro1");
+      tank2.div.classList.remove("intro2");
+      tank1.div.classList.add("active");
+      tank2.div.classList.add("active");
       btnReg.className = "hidden";
       btnStart.className = "hidden";
       divMelding.className = "hidden";
+      playTheGame(divBoard, [tank1,tank2], player );
     }
 }
 
