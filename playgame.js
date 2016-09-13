@@ -27,6 +27,7 @@ function playTheGame(stage, tanks) {
       t1.v = Math.max(-t1.speed * 0.3, t1.v - t1.a);
     }
     t1.move(t1.v);
+    t1.v *= 0.98;
 
   }
 

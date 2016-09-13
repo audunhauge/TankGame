@@ -27,9 +27,9 @@ class Tank {
   turn(delta) {
     if (this.alive) {
       if (this.v < 0) delta *= 2.5;        //turn fast when reversing
-      var d = (this.rot + delta) % 360;
+      let d = (this.rot + delta) % 360;
       this.rot = d;
-      this.div.style.transform = 'rotate(' + (+d) + 'deg)';
+      this.div.style.transform = 'rotate(' + d + 'deg)';
     }
   }
 }
