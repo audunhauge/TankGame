@@ -2,6 +2,7 @@
     position: relative;
     left: 20px;
     width: 500px;
+    /*  */
     height: 500px;
     background-color: white;
     border: solid red 1px;
@@ -15,11 +16,14 @@
     top: calc(50% - 90px);
 }
 
-
 .startbutton {
     position: absolute;
     left: calc(50% - 25px);
     top: calc(50% - 8px);
+}
+
+#reg {
+  top: calc(50% + 28px);
 }
 
 .tanks.intro1 {
@@ -33,6 +37,10 @@
 .go_away {
   animation: goLeft 1s;
   animation-fill-mode: forwards;
+}
+
+.hidden {
+  display: none;
 }
 
 .come_here {
@@ -86,7 +94,7 @@
 }
 
 .tanks {
-    position: relative;
+    position: absolute;
     width: 30px;
     height: 13px;
     background-color: blue;
@@ -119,4 +127,8 @@
     height: 2px;
     background: linear-gradient(to top, #00c,#99c);
     box-shadow: 1px 1px 1px rgba(10,10,10,0.2);
+}
+
+.tanks.active {
+  visibility: visible;
 }
