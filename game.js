@@ -35,7 +35,7 @@ function setup() {
     btnStart.innerHTML = "Start Spillet";
     btnStart.id = "start";
     
-    if (playerInfo !== undefined) {
+    if (playerInfo !== null) {
         let playerObject = JSON.parse(playerInfo);
         divMelding.innerHTML = `Hei ${playerObject.navn}`;
         btnReg.innerHTML = "Rediger info";
@@ -72,7 +72,7 @@ function setup() {
       let btnLagre = document.getElementById("lagre");
       btnLagre.addEventListener("click", lagreInfo);
       
-      if (playerInfo !== undefined) {
+      if (playerInfo !== null) {
         let playerObject = JSON.parse(playerInfo);
         inpNavn.value = playerObject.navn;
         inpAlder.value = playerObject.alder;
