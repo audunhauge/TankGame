@@ -1,44 +1,57 @@
-var 
-        gameport        = process.env.PORT || 4004,
+// start med å definere en del variable
+let app      = require('express')();
+let server   = require('http').Server(app);
+let io       = require('socket.io')(server);
+let gameport = process.env.PORT || 4004;
 
-        io              = require('socket.io'),
-        express         = require('express'),
-        UUID            = require('node-uuid'),
+let antallSpillere = 0;
+let world = {};   // empty world
 
-        verbose         = false,
-        app             = express.createServer();
+server.listen( gameport );
 
-/* Express server set up. */
+console.log('Spillet kjøres fra http://localhost:' + gameport );
 
-//The express server handles passing our content to the browser,
-//As well as routing users where they need to go. This example is bare bones
-//and will serve any file the user requests from the root of your web server (where you launch the script from)
-//so keep this in mind - this is not a production script but a development teaching tool.
-
-        //Tell the server to listen for incoming connections
-    app.listen( gameport );
-
-        //Log something so we know that it succeeded.
-    console.log('\t :: Express :: Listening on port ' + gameport );
-
-        //By default, we forward the / path to index.html automatically.
-    app.get( '/', function( req, res ){ 
-        res.sendfile( __dirname + '/game.html' );
-    });
+// dersom du ikke spesifiserer en fil, da sender vi game.html
+app.get( '/', function( req, res ){ 
+     res.sendFile( __dirname + '/game.html' );
+});
 
 
-        //This handler will listen for requests on /*, any file from the root of our server.
-        //See expressjs documentation for more info on routing.
+// alle andre filer
+app.get( '/*' , function( req, res, next ) {
+   // filnavnet de har bestillt
+   var file = req.params[0]; 
+   // send filen
+   res.sendFile( __dirname + '/' + file );
+});
 
-    app.get( '/*' , function( req, res, next ) {
-
-            //This is the current file they have requested
-        var file = req.params[0]; 
-
-            //For debugging, we can track what files are requested.
-        if(verbose) console.log('\t :: Express :: file requested : ' + file);
-
-            //Send the requesting client the file.
-        res.sendfile( __dirname + '/' + file );
-
-    });
+// samtaler med klientene
+io.on('connection', function(socket) {  
+   antallSpillere++;
+   io.emit('stats', { antallSpillere });
+   
+   socket.on('disconnect', function() {
+     antallSpillere--;
+     io.emit('stats', { antallSpillere });
+   });
+   
+   socket.on('newpos', function(data) {
+     let {myself, posVelAcRot} = data;
+     let tank = world[myself].tank || {};
+     tank.x = posVelAcRot.x;
+     tank.y = posVelAcRot.y;
+     tank.v = posVelAcRot.v;
+     tank.a = posVelAcRot.a;
+     tank.r = posVelAcRot.r
+     world[myself].tank = tank;
+     io.emit('update', world);
+   });
+   
+   socket.on('start', function(data) {
+     let player = data;
+     if (player.navn) {
+       world[player.navn] = player;
+     }
+     io.emit('startgame', world);
+   })
+});

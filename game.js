@@ -1,12 +1,29 @@
 'use strict';
 
+// vi trenger socket som global variabel
+let socket = io.connect('/');
+let world = {};  // tom verden
+   
+
 function setup() {
     const MAXSKUDD = 20;
     let poeng = 0;
+    let gameState = 'waiting';
+   
 
     let divBoard = document.getElementById("board");
     let divMelding = document.getElementById("melding");
     let frmRegistrer = document.getElementById("registrer");
+    
+    let antallSpillere = 0;
+    
+    // knapp for start av spillet
+    let btnStart = document.createElement("button");
+    btnStart.className = "startbutton hidden";
+    btnStart.innerHTML = "Start Spillet";
+    btnStart.id = "start";
+    
+    
     
     // sjekk om denne brukeren er registrert
     let playerInfo = localStorage.getItem('player');
@@ -30,20 +47,14 @@ function setup() {
     let btnReg = document.createElement("button");
     btnReg.className = "startbutton";
     btnReg.id = "reg";
-    
-    // knapp for start av spillet
-    let btnStart = document.createElement("button");
-    btnStart.className = "startbutton hidden";
-    btnStart.innerHTML = "Start Spillet";
-    btnStart.id = "start";
-    
 
     // har vi data om spiller fra før ?
     if (playerInfo !== null) {
         let playerObject = JSON.parse(playerInfo);
-        divMelding.innerHTML = `Hei ${playerObject.navn}`;
+        divMelding.innerHTML = `Hei ${playerObject.navn}<br>
+        Det er <span id="antall">${antallSpillere}</span> spillere på nå.`;
         btnReg.innerHTML = "Rediger info";
-        btnStart.classList.remove("hidden");  
+        // btnStart.classList.remove("hidden");  
         player.navn = playerObject.navn;
         player.alder = playerObject.alder;  
         player.farge = playerObject.farge || "#0000ff";
@@ -122,7 +133,23 @@ function setup() {
       btnStart.className = "hidden";
       divMelding.className = "hidden";
       playTheGame(divBoard, [tank1,tank2], player );
+      gameState = 'playing';
     }
+    
+    socket.on('stats', function(data) {
+        antallSpillere = data.antallSpillere;
+        document.getElementById('antall').innerHTML = "" + antallSpillere;
+        if (antallSpillere > 1) {
+          btnStart.classList.remove("hidden");
+        }
+    });
+
+    socket.on('startgame', function(data) {
+      world = data;
+      if (gameState == 'waiting') {
+        startGame();
+      }
+    }); 
 }
 
 /**

@@ -1,0 +1,13 @@
+{
+  "name": "tankgame",
+  "version": "0.6.1",
+  "private": true,
+  "scripts": {
+    "start": "node app"
+  },
+  "dependencies": {
+    "socket.io": "*",
+    "express": "*",
+    "node-uuid": "*"
+  }
+}

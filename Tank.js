@@ -29,7 +29,10 @@ class Tank {
       if (this.v < 0) delta *= 2.5;        //turn fast when reversing
       let d = (this.rot + delta) % 360;
       this.rot = d;
-      this.div.style.transform = 'rotate(' + d + 'deg)';
     }
+  }
+  
+  direction(angle) {
+    this.div.style.transform = 'rotate(' + angle + 'deg)';
   }
 }
