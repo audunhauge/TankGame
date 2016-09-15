@@ -31,12 +31,10 @@ function setup() {
     // vi skal legge en tanks ut på skjermen
     // første versjon er bare en div med class="tank"
     let tank1 = new Tank("t1","intro1");
-  
     // legg tanken ut på stagen (på board)
     divBoard.appendChild(tank1.div);  
 
     let tank2 = new Tank("t2", "intro2");
-  
     // legg tanken ut på stagen (på board)
     divBoard.appendChild(tank2.div); 
     
@@ -58,11 +56,12 @@ function setup() {
         player.navn = playerObject.navn;
         player.alder = playerObject.alder;  
         player.farge = playerObject.farge || "#0000ff";
+        socket.emit('ready',  player);
     } else {
         btnReg.innerHTML = "Registrer deg";  
     }   
   
-    btnStart.addEventListener("click",startGame);
+    btnStart.addEventListener("click",readyToPlay);
     btnReg.addEventListener("click",registrer);
     // legg knapper ut på stagen (på board)
     divBoard.appendChild(btnReg); 
@@ -114,12 +113,12 @@ function setup() {
         frmRegistrer.classList.remove("come_here");
         void frmRegistrer.offsetWidth;
         frmRegistrer.classList.add("go_away");
-        btnStart.classList.remove("hidden");
+        socket.emit('ready',  player);
       }
     }
     
-    // start spillet
-    function startGame() {
+    // klargjør spillet
+    function readyToPlay() {
       // fjern animeringen
       tank1.div.classList.remove("intro1");
       tank2.div.classList.remove("intro2");
@@ -132,22 +131,44 @@ function setup() {
       btnReg.className = "hidden";
       btnStart.className = "hidden";
       divMelding.className = "hidden";
-      playTheGame(divBoard, [tank1,tank2], player );
-      gameState = 'playing';
+      gameState = 'ready';
+      socket.emit('start', player);
     }
+        
     
     socket.on('stats', function(data) {
         antallSpillere = data.antallSpillere;
         document.getElementById('antall').innerHTML = "" + antallSpillere;
-        if (antallSpillere > 1) {
+        if (gameState === 'waiting' && antallSpillere > 1) {
           btnStart.classList.remove("hidden");
         }
     });
 
     socket.on('startgame', function(data) {
-      world = data;
-      if (gameState == 'waiting') {
-        startGame();
+      world = data;      
+      if (gameState === 'waiting') {
+        readyToPlay();
+      } else if (gameState === 'ready') {
+        let myself = player.navn;
+        let tankcount = 2;
+        let tankList = [tank1,tank2];
+        gameState = 'playing';
+        for (let otherPlayer of Object.keys(world)) {
+          if (otherPlayer !== myself) {
+            if (tankcount > 2) {
+              // make a new tank
+               let t34 = new Tank("t"+tankcount, "active");
+               // legg tanken ut på stagen (på board)
+               t34.div.style.backgroundColor = world[otherPlayer].farge;
+               divBoard.appendChild(t34.div); 
+               tankList.push(t34);
+            } else {
+               tank2.div.style.backgroundColor = world[otherPlayer].farge;
+            }
+            tankcount++;
+          }
+        }
+        playTheGame(divBoard, tankList, player);
       }
     }); 
 }

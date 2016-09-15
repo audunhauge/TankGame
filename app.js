@@ -27,31 +27,39 @@ app.get( '/*' , function( req, res, next ) {
 
 // samtaler med klientene
 io.on('connection', function(socket) {  
-   antallSpillere++;
+
    io.emit('stats', { antallSpillere });
    
    socket.on('disconnect', function() {
-     antallSpillere--;
+     antallSpillere = (Object.keys(world)).length;
+     io.emit('stats', { antallSpillere });
+   });
+
+   // en spiller er klar, tell alle og send stats
+   socket.on('ready', function(player) {
+     world[player.navn] = player;
+     antallSpillere = (Object.keys(world)).length;
      io.emit('stats', { antallSpillere });
    });
    
+   // en spiller har flytta på tanksen sin
    socket.on('newpos', function(data) {
-     let {myself, posVelAcRot} = data;
+     let {myself, posVelRot} = data;
      let tank = world[myself].tank || {};
-     tank.x = posVelAcRot.x;
-     tank.y = posVelAcRot.y;
-     tank.v = posVelAcRot.v;
-     tank.a = posVelAcRot.a;
-     tank.r = posVelAcRot.r
+     tank.x = posVelRot.x;
+     tank.y = posVelRot.y;
+     tank.v = posVelRot.v;
+     tank.r = posVelRot.r;
      world[myself].tank = tank;
      io.emit('update', world);
    });
    
+   // en spiller ønsker å starte, alle tilkobla får startbeskjed
    socket.on('start', function(data) {
      let player = data;
      if (player.navn) {
        world[player.navn] = player;
      }
      io.emit('startgame', world);
-   })
+   });
 });
