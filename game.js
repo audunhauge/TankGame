@@ -26,15 +26,19 @@ function setup() {
     // lag en ny spiller
     let player = new Player("noname",12);
     
+    // knapp for registrering av spiller
     let btnReg = document.createElement("button");
     btnReg.className = "startbutton";
     btnReg.id = "reg";
     
+    // knapp for start av spillet
     let btnStart = document.createElement("button");
     btnStart.className = "startbutton hidden";
     btnStart.innerHTML = "Start Spillet";
     btnStart.id = "start";
     
+
+    // har vi data om spiller fra før ?
     if (playerInfo !== null) {
         let playerObject = JSON.parse(playerInfo);
         divMelding.innerHTML = `Hei ${playerObject.navn}`;
@@ -48,11 +52,12 @@ function setup() {
   
     btnStart.addEventListener("click",startGame);
     btnReg.addEventListener("click",registrer);
-    // legg start-knappen ut på stagen (på board)
+    // legg knapper ut på stagen (på board)
     divBoard.appendChild(btnReg); 
     divBoard.appendChild(btnStart);      
     
     
+    // bruker registrerer data
     function registrer(e) { 
       let inpNavn = document.getElementById("navn")
       let inpAlder = document.getElementById("alder");
@@ -62,8 +67,7 @@ function setup() {
       divBoard.classList.remove("come_here");
       void divBoard.offsetWidth;
       divBoard.classList.add("go_away");
-      // css klassen go_away animerer spillebrettet
-      // ut til siden
+      // css klassen go_away animerer spillebrettet vekk
       frmRegistrer.classList.remove("go_away");
       void frmRegistrer.offsetWidth;
       frmRegistrer.classList.add("come_here");
@@ -71,7 +75,8 @@ function setup() {
       
       let btnLagre = document.getElementById("lagre");
       btnLagre.addEventListener("click", lagreInfo);
-      
+
+      // vis lagra data i skjema dersom vi har noe
       if (playerInfo !== null) {
         let playerObject = JSON.parse(playerInfo);
         inpNavn.value = playerObject.navn;
@@ -79,6 +84,7 @@ function setup() {
         inpDato.value = playerObject.dato;
       }
       
+      // lagre data fra skjema i localStorage
       function lagreInfo(e) {
         let navn = capAll(inpNavn.value);
         let alder = inpAlder.valueAsNumber;
@@ -90,7 +96,7 @@ function setup() {
         
         localStorage.setItem("player", playerInfo );
         divBoard.classList.remove("go_away");
-        void divBoard.offsetWidth;
+        void divBoard.offsetWidth;  // trigger reflow
         divBoard.classList.add("come_here");
         frmRegistrer.classList.remove("come_here");
         void frmRegistrer.offsetWidth;
@@ -99,7 +105,9 @@ function setup() {
       }
     }
     
+    // start spillet
     function startGame() {
+      // fjern animeringen
       tank1.div.classList.remove("intro1");
       tank2.div.classList.remove("intro2");
       tank1.div.classList.add("active");
