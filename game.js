@@ -24,7 +24,7 @@ function setup() {
     divBoard.appendChild(tank2.div); 
     
     // lag en ny spiller
-    let player = new Player("noname",12);
+    let player = new Player("noname",12,"red");
     
     // knapp for registrering av spiller
     let btnReg = document.createElement("button");
@@ -46,6 +46,7 @@ function setup() {
         btnStart.classList.remove("hidden");  
         player.navn = playerObject.navn;
         player.alder = playerObject.alder;  
+        player.farge = playerObject.farge || "#0000ff";
     } else {
         btnReg.innerHTML = "Registrer deg";  
     }   
@@ -61,7 +62,7 @@ function setup() {
     function registrer(e) { 
       let inpNavn = document.getElementById("navn")
       let inpAlder = document.getElementById("alder");
-      let inpDato = document.getElementById("dato");
+      let inpFarge = document.getElementById("farge");
             
       // først skjuler vi spillebrettet
       divBoard.classList.remove("come_here");
@@ -80,19 +81,20 @@ function setup() {
       if (playerInfo !== null) {
         let playerObject = JSON.parse(playerInfo);
         inpNavn.value = playerObject.navn;
-        inpAlder.value = playerObject.alder;
-        inpDato.value = playerObject.dato;
+        inpAlder.value = playerObject.alder || 12;
+        inpFarge.value = playerObject.farge || "#0000ff";
       }
       
       // lagre data fra skjema i localStorage
       function lagreInfo(e) {
         let navn = capAll(inpNavn.value);
         let alder = inpAlder.valueAsNumber;
-        let dato = inpDato.value;
+        let farge = inpFarge.value;
         
-        let playerInfo = JSON.stringify({navn,alder,dato});
+        playerInfo = JSON.stringify({navn,alder,farge});
         player.navn = navn;
         player.alder = alder; 
+        player.farge = farge;
         
         localStorage.setItem("player", playerInfo );
         divBoard.classList.remove("go_away");
@@ -110,6 +112,10 @@ function setup() {
       // fjern animeringen
       tank1.div.classList.remove("intro1");
       tank2.div.classList.remove("intro2");
+
+      // set farge på spillerens tank
+      tank1.div.style.backgroundColor = player.farge;
+
       tank1.div.classList.add("active");
       tank2.div.classList.add("active");
       btnReg.className = "hidden";

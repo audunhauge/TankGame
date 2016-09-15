@@ -18,49 +18,34 @@ function playTheGame(stage, tanks) {
   //   let t1 = tanks[0];
   //   let t2 = tanks[1];
   let [t1,t2] = tanks;
-  let keysT1 = [ keys.ArrowLeft, keys.ArrowRight, keys.ArrowUp, keys.ArrowDown];
-  let keysT2 = [ keys.KeyA, keys.KeyD, keys.KeyW, keys.KeyS];
+  
+  let keysT1 = "ArrowLeft,ArrowRight,ArrowUp,ArrowDown".split(",");
+  let keysT2 = "KeyA,KeyD,KeyW,KeyS".split(",");
 
   function animate(e) {
     moveTank(t1,keysT1);
-    moveTank(t1,keysT1);
+    moveTank(t2,keysT2);
   }
 
-  function moveTanks() {
+  function moveTank(tank, [left,right,up,down]) {
     // styring av tanks 1
-    if (keys.ArrowLeft) {
-      t1.turn(-t1.turnrate);
+    if (keys[left]) {
+      tank.turn(-tank.turnrate);
     }
-    if (keys.ArrowRight) {
-      t1.turn(t1.turnrate);
+    if (keys[right]) {
+      tank.turn(tank.turnrate);
     }
-    if (keys.ArrowUp) {
-      t1.v = Math.min(t1.speed, t1.v + t1.a);
+    if (keys[up]) {
+      tank.v = Math.min(tank.speed, tank.v + tank.a);
     }
-    if (keys.ArrowDown) {
-      t1.v = Math.max(-t1.speed * 0.3, t1.v - t1.a);
-    }
-
-    // styring av tanks 2
-    if (keys.KeyA) {
-      t2.turn(-t2.turnrate);
-    }
-    if (keys.KeyD) {
-      t2.turn(t2.turnrate);
-    }
-    if (keys.KeyW) {
-      t2.v = Math.min(t2.speed, t2.v + t2.a);
-    }
-    if (keys.KeyS) {
-      t2.v = Math.max(-t2.speed * 0.3, t2.v - t2.a);
+    if (keys[down]) {
+      tank.v = Math.max(-tank.speed * 0.3, tank.v - tank.a);
     }
 
     // oppdater posisjon og fart for tanks
-    t1.move(t1.v);
-    t1.v *= 0.98;   // rullemotstand
+    tank.move(tank.v);
+    tank.v *= 0.98;   // rullemotstand
 
-    t2.move(t2.v);
-    t2.v *= 0.98;
   }
 
 }
