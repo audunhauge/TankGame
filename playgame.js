@@ -13,13 +13,23 @@ function playTheGame(stage, tanks, player) {
     keys[e.code] = 1;
   };
   
+  // lag 20 skudd
+  let skudd = [];
+  let skuddIdx = 0;  // neste ledige skudd
+  for (let i=0; i<20; i++) {
+    let s = new Skudd("s" + i,"");
+    skudd.push(s);
+    stage.appendChild(s.div);
+  }
+  
   let myself = player.navn;
   let justStarted = true;
   
-  let keysT1 = "ArrowLeft,ArrowRight,ArrowUp,ArrowDown".split(",");
+  let keysT1 = "ArrowLeft,ArrowRight,ArrowUp,ArrowDown,KeyZ".split(",");
   
 
   function animate(e) {
+    flyttSkudd();
     let t1 = tanks[0];             // min egen tank
     steerTank(t1, keysT1);         // styres med piltaster
     moveTank(t1);
@@ -41,8 +51,16 @@ function playTheGame(stage, tanks, player) {
       }
     }
   }
+  
+  function flyttSkudd() {
+    for (let s of skudd) {
+      if (s.alive) {
+        s.move(5);
+      }
+    }
+  }
 
-  function steerTank(tank, [left,right,up,down]) {
+  function steerTank(tank, [left,right,up,down,fire]) {
     // styring av tanks 1
     let change = false || justStarted;
     justStarted = false;
@@ -62,6 +80,19 @@ function playTheGame(stage, tanks, player) {
       tank.v = Math.max(-tank.speed * 0.3, tank.v - tank.a);
       change = true;
     }
+    if (keys[fire]) {
+      if (tank.delay < 1) {
+        if (skudd[skuddIdx].alive === false) {
+          let s = skudd[skuddIdx];
+          s.fire(tank.x, tank.y, tank.rot);
+          tank.delay = 12;
+        }
+        skuddIdx = (skuddIdx + 1) % skudd.length;
+      } 
+    }
+    
+    tank.delay = Math.max(0,tank.delay - 1);
+
     // gi beskjed til serveren om våres nye posisjon
     // fart + rot sendes også
     // bare send dersom tanks beveger seg eller snur
@@ -88,22 +119,6 @@ function playTheGame(stage, tanks, player) {
   // overskriver world med serverens syn på verden
   socket.on('update', function(data) {
       world = data;  // serveren er BOSS
-      for (let gamer of Object.keys(world)) {
-        if (gamer !== myself) {
-          // dersom denne spilleren ikke er meg
-          // da må det være en av de andre ...
-          // merk at en klient kan jukse og teleportere tanken sin
-          // ved å endre x,y - serveren stoler på spillerene ...
-          if (world[gamer].tank) {
-            let tank = world[gamer].tank;
-            t2.v = tank.v;
-            t2.a = tank.a;
-            t2.x = tank.x;
-            t2.y = tank.y;
-            t2.rot = tank.r;
-          }
-        }
-      }
     }); 
 
 }

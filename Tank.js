@@ -11,6 +11,7 @@ class Tank {
     this.y = 0;
     this.v = 0;
     this.rot = 0;
+    this.delay = 0;
     this.turnrate = 2;
     this.alive = true;
   }

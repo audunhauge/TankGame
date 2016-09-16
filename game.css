@@ -16,6 +16,15 @@
     top: calc(50% - 90px);
 }
 
+.skudd {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 8px;
+  height: 2px;
+  background-color: green;
+}
+
 .startbutton {
     position: absolute;
     left: calc(50% - 25px);
