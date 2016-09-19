@@ -5,6 +5,9 @@ function playTheGame(stage, tanks, player) {
   window.setInterval(animate, 45);
   const keys = [];
 
+  const myself = player.navn;
+  let justStarted = true;
+
   document.onkeyup = function (e) {                                                                                                           
     keys[e.code] = 0;
   };
@@ -12,6 +15,17 @@ function playTheGame(stage, tanks, player) {
   document.onkeydown = function (e) {
     keys[e.code] = 1;
   };
+
+  // lag en map for alle tanks
+  // gitt navnet på en player, da kan du finne tillsvarende tanks
+  let tankList = new Map();
+  for (let t of tanks) {
+    tankList.set(t.owner, t);
+  }
+
+  // lag en liste over ting mine skudd kan treffe
+  let shootables = tanks.filter( t => t.owner !== myself);
+  
   
   // lag 20 skudd
   let skudd = [];
@@ -22,9 +36,6 @@ function playTheGame(stage, tanks, player) {
     stage.appendChild(s.div);
   }
   
-  let myself = player.navn;
-  let justStarted = true;
-  
   let keysT1 = "ArrowLeft,ArrowRight,ArrowUp,ArrowDown,KeyZ".split(",");
   
 
@@ -33,21 +44,19 @@ function playTheGame(stage, tanks, player) {
     let t1 = tanks[0];             // min egen tank
     steerTank(t1, keysT1);         // styres med piltaster
     moveTank(t1);
-    let idx = 1;
     for (let gamer of Object.keys(world)) {
       if (gamer !== myself && world[gamer].tank) {
-        let posVecRot = world[gamer].tank;
+        let posVecRot = world[gamer].body;
         // world er verden slik serveren ser den, alle tanks er lagra her
         // for hver spiller sendes x,y,r(rot),v
-        let tank = tanks[idx];
-        tank.x = posVecRot.x;
-        tank.y = posVecRot.y;
-        tank.v = posVecRot.v;
-        tank.rot = posVecRot.r;
+        let tank = tankList.get(gamer);
+        tank.body.x = posVecRot.x;
+        tank.body.y = posVecRot.y;
+        tank.body.v = posVecRot.v;
+        tank.body.rot = posVecRot.r;
         // nå er vår lokale kopi av andre spillers tank oppdatert
         // dermed kan den flyttes
         moveTank(tank);
-        idx++;
       }
     }
   }
@@ -56,6 +65,27 @@ function playTheGame(stage, tanks, player) {
     for (let s of skudd) {
       if (s.alive) {
         s.move(5);
+        if (s.owner === myself) {
+          // check own shots for collitions
+          collide(s, shootables);
+        }
+      }
+    }
+  }
+
+  function collide(me, others) {
+    // sjekk om me kolliderer med others
+    for (let other of others) {
+      if (me.body.overlap(other.body)) {
+        socket.emit("hit",{ ident  : me.is ,
+                            owner  : me.owner,
+                            idnum  : me.idnum}, 
+                          { ident  : other.is,
+                            owner  : other.owner, 
+                            idnum  : other.idnum
+                          }
+                    );
+        break;
       }
     }
   }
@@ -73,19 +103,22 @@ function playTheGame(stage, tanks, player) {
       change = true;
     }
     if (keys[up]) {
-      tank.v = Math.min(tank.speed, tank.v + tank.a);
+      tank.body.v = Math.min(tank.speed, tank.body.v + tank.a);
       change = true;
     }
     if (keys[down]) {
-      tank.v = Math.max(-tank.speed * 0.3, tank.v - tank.a);
+      tank.body.v = Math.max(-tank.speed * 0.3, tank.body.v - tank.a);
       change = true;
     }
     if (keys[fire]) {
       if (tank.delay < 1) {
         if (skudd[skuddIdx].alive === false) {
           let s = skudd[skuddIdx];
-          s.fire(tank.x, tank.y, tank.rot);
-          tank.delay = 12;
+          s.fire(myself, tank.body.x, tank.body.y, tank.body.rot);
+          s.idnum = Skudd.idnum;  // playername + idnum will be uiniq for live shots 
+          tank.delay = 22;
+          socket.emit("fire",{player:myself, idnum:s.idnum, 
+                   x:tank.body.x, y:tank.body.y, rot:tank.body.rot});
         }
         skuddIdx = (skuddIdx + 1) % skudd.length;
       } 
@@ -96,12 +129,12 @@ function playTheGame(stage, tanks, player) {
     // gi beskjed til serveren om våres nye posisjon
     // fart + rot sendes også
     // bare send dersom tanks beveger seg eller snur
-    if (Math.abs(tank.v) > 0.05 || change) {
+    if (Math.abs(tank.body.v) > 0.05 || change) {
       let posVelRot = { 
-        x:tank.x, 
-        y:tank.y, 
-        v:tank.v, 
-        r:tank.rot 
+        x:tank.body.x, 
+        y:tank.body.y, 
+        v:tank.body.v, 
+        r:tank.body.rot 
         };
       socket.emit('newpos',  {myself, posVelRot}); 
     }
@@ -109,9 +142,9 @@ function playTheGame(stage, tanks, player) {
 
   function moveTank(tank) {
     // oppdater posisjon, retning og fart for tanks
-    tank.move(tank.v);
-    tank.direction(tank.rot);
-    tank.v *= 0.98;   // rullemotstand
+    tank.move(tank.body.v);
+    tank.direction(tank.body.rot);
+    tank.body.v *= 0.98;   // rullemotstand
   }
   
   // serveren sender 'update' meldinger som fanges opp her
@@ -120,5 +153,36 @@ function playTheGame(stage, tanks, player) {
   socket.on('update', function(data) {
       world = data;  // serveren er BOSS
     }); 
+
+  socket.on('hit', function({actor,target}) {
+    // actor hit target
+    if (actor.ident === 'Shot') {
+      skudd.forEach( e => {
+        if (e.idnum === actor.idnum && e.owner === actor.owner) {
+          e.die();
+        }
+      });
+    }
+
+  });
+
+  socket.on('fire', function( {player,x,y,rot}) {
+    if (player !== myself) {
+      // med litt flax virker skuddIdx
+      if (skudd[skuddIdx].alive === false) {
+        let s = skudd[skuddIdx];
+        s.fire(myself,x,y,rot);
+        skuddIdx = (skuddIdx + 1) % skudd.length;
+      } else {
+        // brute force scan skudd
+        for (let s of skudd) {
+          if (!s.alive) {
+            s.fire(x,y,rot);
+            break;
+          }
+        }
+      }
+    }
+  });
 
 }

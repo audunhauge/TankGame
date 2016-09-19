@@ -152,6 +152,7 @@ function setup() {
         let myself = player.navn;
         let tankcount = 2;
         let tankList = [tank1,tank2];
+        tank1.owner = myself;
         gameState = 'playing';
         for (let otherPlayer of Object.keys(world)) {
           if (otherPlayer !== myself) {
@@ -161,8 +162,10 @@ function setup() {
                // legg tanken ut på stagen (på board)
                t34.div.style.backgroundColor = world[otherPlayer].farge;
                divBoard.appendChild(t34.div); 
+               t34.owner = otherPlayer;
                tankList.push(t34);
             } else {
+               tank2.owner = otherPlayer;
                tank2.div.style.backgroundColor = world[otherPlayer].farge;
             }
             tankcount++;

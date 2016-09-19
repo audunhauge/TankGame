@@ -1,32 +1,59 @@
+let _idnum = 0;
+
 class Skudd {
+
+  static get idnum() {
+    _idnum = (_idnum + 1) % 20;
+    return _idnum;
+  }
+
   constructor(id, klass) {
     this.div = document.createElement("div");
+    this.div.id = id;
     this.div.className = "skudd " + klass;
-    this.x = 0;
-    this.y = 0;
-    this.v = 0;
-    this.rot = 0;
+    this.body = new RigidBody(0,0,1,3,0);    
     this.alive = false;
+    this.owner = null;
+    // each shot must have an owner
+    // used to avoid shooting self
+    this.idnum = 0;  // each player numers her shots % 20
+    this.is = 'Skudd';
+  }
+
+  hit(other) {
+    die();
+    return 20;
+  }
+
+  die() {
+    this.alive = false;
+    this.body.x = -200;
+    this.setpos();
   }
   
-  fire(x,y,rot) {
+  fire(owner, idnum, x, y, rot) {
     this.alive = true;
-    this.x = x+5;
-    this.y = y+5;
-    this.rot = rot;
+    this.body.x = x - 3 * Math.cos(Math.PI * (this.rot - 90) / 180);
+    this.body.y = y + 3 * Math.sin(Math.PI * (this.rot + 90) / 180);
+    this.body.rot = rot;
+    this.owner = owner;
+    this.idnum = idnum;
     this.div.style.transform = 'rotate(' + rot + 'deg)';
   }
   
   move(delta) {
     if (this.alive) {
-      this.y += delta * Math.sin(Math.PI * this.rot / 180);
-      this.x += delta * Math.cos(Math.PI * this.rot / 180);
-      this.div.style.left = this.x + "px";
-      this.div.style.top = this.y + "px";
-      if (this.x < 0 || this.x > 500 || this.y < 0 || this.y > 500) {
+      this.body.move(delta);
+      this.setpos();
+      if (this.body.x < 0 || this.body.x > 500 || this.body.y < 0 || this.body.y > 500) {
         this.alive = false;
       }
     }
+  }
+
+  setpos() {
+    this.div.style.left = this.body.x + "px";
+    this.div.style.top = this.body.y + "px";
   }
   
 }

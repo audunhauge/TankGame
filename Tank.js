@@ -7,29 +7,36 @@ class Tank {
     this.div.id = id;
     this.speed = 1;
     this.a = 0.035;
-    this.x = 0;
-    this.y = 0;
-    this.v = 0;
-    this.rot = 0;
+    this.body = new RigidBody(0,0,THW,THW,0);
     this.delay = 0;
     this.turnrate = 2;
     this.alive = true;
+    this.owner = null;
+    this.is = 'Tank';
+    this.idnum = 0;
+  }
+
+  hit(other) {
+    return 5;
   }
 
   move(delta) {
     if (this.alive) {
-      this.y += delta * Math.sin(Math.PI * this.rot / 180);
-      this.x += delta * Math.cos(Math.PI * this.rot / 180);
-      this.div.style.left = this.x + "px";
-      this.div.style.top = this.y + "px";
+      this.body.move(delta);
+      this.setpos();
     }
+  }
+
+  setpos() {
+    this.div.style.left = this.body.x + "px";
+    this.div.style.top = this.body.y + "px";
   }
 
   turn(delta) {
     if (this.alive) {
-      if (this.v < 0) delta *= 2.5;        //turn fast when reversing
-      let d = (this.rot + delta) % 360;
-      this.rot = d;
+      if (this.body.v < 0) delta *= 2.5;        //turn fast when reversing
+      let d = (this.body.rot + delta) % 360;
+      this.body.rot = d;
     }
   }
   

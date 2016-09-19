@@ -41,16 +41,29 @@ io.on('connection', function(socket) {
      antallSpillere = (Object.keys(world)).length;
      io.emit('stats', { antallSpillere });
    });
+
+   // en spiller skyter
+   // bare broadcast til alle andre
+   socket.on("fire", function(data) {
+     io.emit("fire",data);
+   });
+
+   // noen har truffet noe
+   // bare broadcast til alle andre
+   socket.on("hit", function(actor, target) {
+     io.emit("hit",actor, target);
+   });
+
    
    // en spiller har flytta på tanksen sin
    socket.on('newpos', function(data) {
      let {myself, posVelRot} = data;
-     let tank = world[myself].tank || {};
-     tank.x = posVelRot.x;
-     tank.y = posVelRot.y;
-     tank.v = posVelRot.v;
-     tank.r = posVelRot.r;
-     world[myself].tank = tank;
+     let body = world[myself].body || {};
+     body.x = posVelRot.x;
+     body.y = posVelRot.y;
+     body.v = posVelRot.v;
+     body.r = posVelRot.r;
+     world[myself].body = body;
      io.emit('update', world);
    });
    
