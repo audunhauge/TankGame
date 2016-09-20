@@ -3,8 +3,8 @@ let app      = require('express')();
 let server   = require('http').Server(app);
 let io       = require('socket.io')(server);
 let gameport = process.env.PORT || 4004;
-
 let antallSpillere = 0;
+
 let world = {};   // empty world
 
 server.listen( gameport );
@@ -51,6 +51,7 @@ io.on('connection', function(socket) {
    // noen har truffet noe
    // bare broadcast til alle andre
    socket.on("hit", function(actor, target) {
+     console.log("hit",actor,target);
      io.emit("hit",actor, target);
    });
 

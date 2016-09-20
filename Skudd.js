@@ -16,13 +16,23 @@ class Skudd {
     this.owner = null;
     // each shot must have an owner
     // used to avoid shooting self
-    this.idnum = 0;  // each player numers her shots % 20
+    this.idnum = 0;  // each player numbers her shots % 20
     this.is = 'Skudd';
   }
+  
+  strike(other) {
+    this.alive = false;
+  }
 
-  hit(other) {
-    die();
-    return 20;
+  hit(klass) {
+    switch(klass) {
+      case 'Tank':
+        return 20;
+        break;
+      default:
+        return 50;
+        break;  
+    }
   }
 
   die() {
@@ -33,8 +43,8 @@ class Skudd {
   
   fire(owner, idnum, x, y, rot) {
     this.alive = true;
-    this.body.x = x - 3 * Math.cos(Math.PI * (this.rot - 90) / 180);
-    this.body.y = y + 3 * Math.sin(Math.PI * (this.rot + 90) / 180);
+    this.body.x = x + 12 * Math.sin(Math.PI * rot / 180);
+    this.body.y = y + 5 * Math.cos(Math.PI * rot / 180);
     this.body.rot = rot;
     this.owner = owner;
     this.idnum = idnum;

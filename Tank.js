@@ -14,10 +14,18 @@ class Tank {
     this.owner = null;
     this.is = 'Tank';
     this.idnum = 0;
+    this.hitpoints = 100;
   }
 
-  hit(other) {
+  hit(klass) {
     return 5;
+  }
+  
+  takeDamage(amount) {
+    this.hitpoints -= amount;
+    if (this.hitpoints < 50) {
+      this.div.classList.add("damaged");  
+    }
   }
 
   move(delta) {

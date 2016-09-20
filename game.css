@@ -141,3 +141,8 @@
 .tanks.active {
   visibility: visible;
 }
+
+
+.tanks.damaged {
+    width: 20px;
+}

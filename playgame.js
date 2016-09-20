@@ -45,7 +45,7 @@ function playTheGame(stage, tanks, player) {
     steerTank(t1, keysT1);         // styres med piltaster
     moveTank(t1);
     for (let gamer of Object.keys(world)) {
-      if (gamer !== myself && world[gamer].tank) {
+      if (gamer !== myself && world[gamer].body) {
         let posVecRot = world[gamer].body;
         // world er verden slik serveren ser den, alle tanks er lagra her
         // for hver spiller sendes x,y,r(rot),v
@@ -77,6 +77,9 @@ function playTheGame(stage, tanks, player) {
     // sjekk om me kolliderer med others
     for (let other of others) {
       if (me.body.overlap(other.body)) {
+        me.strike(other);  
+        // strike will change state to not alive 
+        // or back of if collision 
         socket.emit("hit",{ ident  : me.is ,
                             owner  : me.owner,
                             idnum  : me.idnum}, 
@@ -114,7 +117,8 @@ function playTheGame(stage, tanks, player) {
       if (tank.delay < 1) {
         if (skudd[skuddIdx].alive === false) {
           let s = skudd[skuddIdx];
-          s.fire(myself, tank.body.x, tank.body.y, tank.body.rot);
+          let idnum = Skudd.idnum;
+          s.fire(myself,idnum, tank.body.x, tank.body.y, tank.body.rot);
           s.idnum = Skudd.idnum;  // playername + idnum will be uiniq for live shots 
           tank.delay = 22;
           socket.emit("fire",{player:myself, idnum:s.idnum, 
@@ -154,35 +158,36 @@ function playTheGame(stage, tanks, player) {
       world = data;  // serveren er BOSS
     }); 
 
-  socket.on('hit', function({actor,target}) {
+  socket.on('hit', function(actor,target) {
     // actor hit target
-    if (actor.ident === 'Shot') {
-      skudd.forEach( e => {
-        if (e.idnum === actor.idnum && e.owner === actor.owner) {
-          e.die();
+    if (actor.ident === 'Skudd') {
+      skudd.forEach( skudd => {
+        if (skudd.idnum === actor.idnum && skudd.owner === actor.owner) {
+          if (target.ident === 'Tank') {
+            let tank = tankList.get(target.owner);
+            tank.takeDamage(skudd.hit('Tank'));
+          }
+          skudd.die();
         }
       });
     }
+    if (actor.ident === 'Tank') {
+      // a tank has collided with something
+    }
 
   });
-
-  socket.on('fire', function( {player,x,y,rot}) {
+  
+  
+  socket.on('fire', function ({player, idnum, x, y, rot}) {
     if (player !== myself) {
-      // med litt flax virker skuddIdx
-      if (skudd[skuddIdx].alive === false) {
-        let s = skudd[skuddIdx];
-        s.fire(myself,x,y,rot);
-        skuddIdx = (skuddIdx + 1) % skudd.length;
-      } else {
-        // brute force scan skudd
-        for (let s of skudd) {
-          if (!s.alive) {
-            s.fire(x,y,rot);
-            break;
-          }
+      for (let s of skudd) {
+        if (!s.alive) {
+          s.fire(player,idnum,x, y, rot);
+          break;
         }
       }
     }
+
   });
 
 }
