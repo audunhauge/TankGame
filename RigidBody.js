@@ -9,7 +9,6 @@ class RigidBody {
         this.is = 'RigidBody';
     }
 
-
     /**
     * if obj a,b overlap return true
     * RigidBody{x,y,w,h}
