@@ -4,7 +4,6 @@
 let socket = io.connect('/');
 let world = {};  // tom verden
    
-
 function setup() {
     const MAXSKUDD = 20;
     let poeng = 0;
