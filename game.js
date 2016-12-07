@@ -1,7 +1,8 @@
 'use strict';
 
 // vi trenger socket som global variabel
-let socket = io.connect('/');
+let socket = io.connect('/');    // her kan du skrive inn server-adresse
+// io.connect('192.168.1.100');
 let world = {};  // tom verden
    
 function setup() {
